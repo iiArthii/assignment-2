@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 
 import CreateContact from './CreateContact';
 import ContactList from './ContactList';
@@ -12,10 +11,9 @@ function App() {
     const [selectedContact, setSelectedContact] = useState(null);
 
     useEffect(() => {
-        axios.get('/api/contacts')
-            .then(response => {
-                setContacts(response.data);
-            })
+        fetch('/api/contacts')
+            .then(response => response.json())
+            .then(data => setContacts(data))
             .catch(error => {
                 console.error('Error fetching contacts:', error);
             });
@@ -26,9 +24,16 @@ function App() {
     };
 
     const handleContactCreate = (newContact) => {
-        axios.post('/api/contacts', newContact)
-            .then(response => {
-                setContacts([...contacts, response.data]);
+        fetch('/api/contacts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newContact),
+        })
+            .then(response => response.json())
+            .then(data => {
+                setContacts([...contacts, data]);
             })
             .catch(error => {
                 console.error('Error creating contact:', error);
@@ -36,7 +41,9 @@ function App() {
     };
 
     const handleContactDelete = (contactId) => {
-        axios.delete(`/api/contacts/${contactId}`)
+        fetch(`/api/contacts/${contactId}`, {
+            method: 'DELETE',
+        })
             .then(() => {
                 const updatedContacts = contacts.filter(contact => contact.id !== contactId);
                 setContacts(updatedContacts);
