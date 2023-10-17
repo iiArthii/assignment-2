@@ -64,7 +64,6 @@ exports.update = (req, res) => {
     const { contactId } = req.params;
     const { name } = req.body;
 
-    // Validate request
     if (!name) {
         return res.status(400).send({ message: 'Name cannot be empty' });
     }
@@ -75,10 +74,8 @@ exports.update = (req, res) => {
                 return res.status(404).send({ message: 'Contact not found' });
             }
 
-            // Update the contact
             contact.name = name;
 
-            // Save the updated contact
             contact.save()
                 .then(data => {
                     res.send(data);
@@ -105,7 +102,6 @@ exports.delete = (req, res) => {
                 return res.status(404).send({ message: 'Contact not found' });
             }
 
-            // Delete the contact
             contact.destroy()
                 .then(() => {
                     res.send({});
