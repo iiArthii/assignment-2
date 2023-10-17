@@ -12,7 +12,13 @@ exports.create = (req, res) => {
 exports.findAll = (req, res) => {
     Contacts.findAll()
         .then(data => {
-            res.send(data);
+            const modifiedData = data.map(contact => {
+                return {
+                    id: contact.id,
+                    name: contact.name,
+                };
+            });
+            res.send(modifiedData);
         })
         .catch(err => {
             res.status(500).send({
