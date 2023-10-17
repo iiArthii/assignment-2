@@ -7,7 +7,7 @@ function PhoneList({ phones }) {
             <ul>
                 {phones.map((phone) => (
                     <li key={phone.id}>
-                        {phone.name}: {phone.number}
+                        {phone.name}: {phone.number}: {phone.contactId}
                     </li>
                 ))}
             </ul>
