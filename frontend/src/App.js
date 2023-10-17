@@ -5,6 +5,7 @@ function App() {
     const [contacts, setContacts] = useState([]);
     const [selectedContact, setSelectedContact] = useState(null);
     const [phones, setPhones] = useState([]);
+    const [newPhone, setNewPhone] = useState({ name: '', number: '' });
 
     useEffect(() => {
         fetch('http://localhost:5000/api/contacts')
@@ -32,9 +33,31 @@ function App() {
             });
     };
 
+    const handlePhoneCreate = () => {
+        const { name, number } = newPhone;
+        if (name && number) {
+            const newPhoneData = { name, number, contactId: selectedContact };
+            fetch(`http://localhost:5000/api/contacts/${selectedContact}/phones`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newPhoneData),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    setPhones([...phones, data]);
+                })
+                .catch(error => {
+                    console.error('Error creating phone number:', error);
+                });
+            setNewPhone({ name: '', number: '' });
+        }
+    };
+
     const handleContactSelect = (contactId) => {
         setSelectedContact(contactId);
-    
+
         fetch(`http://localhost:5000/api/contacts/${contactId}/phones`)
             .then(response => response.json())
             .then(data => {
@@ -44,7 +67,7 @@ function App() {
                 console.error('Error fetching phone numbers:', error);
             });
     };
-    
+
     const handleContactDelete = (contactId) => {
         fetch(`http://localhost:5000/api/contacts/${contactId}`, {
             method: 'DELETE',
@@ -101,47 +124,28 @@ function App() {
     );
     }
 
-    function CreatePhone({ onCreate }) {
-        const [name, setName] = useState('');
-        const [number, setNumber] = useState('');
-
-        const handlePhoneCreate = () => {
-            if (name && number) {
-                const newPhone = { name, number };
-                onCreate(newPhone);
-                setName('');
-                setNumber('');
-            }
-        };
-
-        return (
-            <div>
-                <h2>Create New Phone Number</h2>
-                
-                <input
-                    type="text"
-                    placeholder="Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
-                <input
-                    type="text"
-                    placeholder="Number"
-                    value={number}
-                    onChange={(e) => setNumber(e.target.value)}
-                />
-                <button onClick={handlePhoneCreate}>Create</button>
-            </div>
-    );
-    }
-
     return (
         <div>
             <h1>Contactor</h1>
 
             <CreateContact onCreate={handleContactCreate} />
             
-            <CreatePhone onCreate={handlePhoneCreate} />
+            <div>
+                <h2>Create New Phone Number</h2>
+                <input
+                    type="text"
+                    placeholder="Name"
+                    value={newPhone.name}
+                    onChange={(e) => setNewPhone({ ...newPhone, name: e.target.value })}
+                />
+                <input
+                    type="text"
+                    placeholder="Number"
+                    value={newPhone.number}
+                    onChange={(e) => setNewPhone({ ...newPhone, number: e.target.value })}
+                />
+                <button onClick={handlePhoneCreate}>Create</button>
+            </div>
 
             <ContactList
                 contacts={contacts}
