@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
+
 import './App.css';
 
 function App() {
     const [contacts, setContacts] = useState([]);
     const [selectedContact, setSelectedContact] = useState(null);
     const [phones, setPhones] = useState([]);
-    const [newPhone, setNewPhone] = useState({ name: '', number: '' });
+    const [name, setName] = useState('');
+    const [number, setNumber] = useState('');
 
     useEffect(() => {
         fetch('http://localhost:5000/api/contacts')
@@ -28,31 +30,9 @@ function App() {
             .then(data => {
                 setContacts([...contacts, data]);
             })
-            .catch(error => {
+            .catch (error => {
                 console.error('Error creating contact:', error);
             });
-    };
-
-    const handlePhoneCreate = () => {
-        const { name, number } = newPhone;
-        if (name && number) {
-            const newPhoneData = { name, number, contactId: selectedContact };
-            fetch(`http://localhost:5000/api/contacts/${selectedContact}/phones`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newPhoneData),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    setPhones([...phones, data]);
-                })
-                .catch(error => {
-                    console.error('Error creating phone number:', error);
-                });
-            setNewPhone({ name: '', number: '' });
-        }
     };
 
     const handleContactSelect = (contactId) => {
@@ -82,6 +62,27 @@ function App() {
             });
     };
 
+    const handlePhoneCreate = (newPhone) => {
+        if (selectedContact && newPhone.name && newPhone.number) {
+            fetch(`http://localhost:5000/api/contacts/${selectedContact}/phones`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newPhone),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const createdPhone = data;
+                setPhones([...phones, createdPhone]);
+                setName('');
+                setNumber('');
+            })
+            .catch(error => {
+                console.error('Error creating phone:', error);
+            });
+        }
+    };
     function ContactList({ contacts, onSelect, onDelete }) {
         return (
             <div>
@@ -96,7 +97,7 @@ function App() {
                     ))}
                 </ul>
             </div>
-    );
+        );
     }
 
     function CreateContact({ onCreate }) {
@@ -122,47 +123,52 @@ function App() {
                 <button onClick={handleCreateContact}>Create</button>
             </div>
     );
-    }
+}
+
+function CreatePhone({ onCreate }) {
+    const [name, setName] = useState('');
+    const [number, setNumber] = useState('');
+
+    const handlePhoneCreate = () => {
+        if (name && number) {
+            const newPhone = { name, number };
+            onCreate(newPhone);
+            setName('');
+            setNumber('');
+        }
+    };
 
     return (
         <div>
-            <h1>Contactor</h1>
+            <h2>Create New Phone Number</h2>
 
-            <CreateContact onCreate={handleContactCreate} />
-            
-            <div>
-                <h2>Create New Phone Number</h2>
-                <input
-                    type="text"
-                    placeholder="Name"
-                    value={newPhone.name}
-                    onChange={(e) => setNewPhone({ ...newPhone, name: e.target.value })}
-                />
-                <input
-                    type="text"
-                    placeholder="Number"
-                    value={newPhone.number}
-                    onChange={(e) => setNewPhone({ ...newPhone, number: e.target.value })}
-                />
-                <button onClick={handlePhoneCreate}>Create</button>
-            </div>
-
-            <ContactList
-                contacts={contacts}
-                onSelect={handleContactSelect}
-                onDelete={handleContactDelete}
+            <input
+                type="text"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
             />
-
-            {selectedContact && (
-                <div>
-                    <PhoneList phones={phones} />
-                </div>
-            )}
+            <input
+                type="text"
+                placeholder="Number"
+                value={number}
+                onChange={(e) => setNumber(e.target.value)}
+            />
+            <button onClick={handlePhoneCreate}>Create</button>
         </div>
     );
 }
 
 function PhoneList({ phones }) {
+    if (!Array.isArray(phones)) {
+        return (
+            <div>
+                <h2>Phone Numbers</h2>
+                <p>No phone numbers found.</p>
+            </div>
+        );
+    }
+
     return (
         <div>
             <h2>Phone Numbers</h2>
@@ -175,6 +181,29 @@ function PhoneList({ phones }) {
             </ul>
         </div>
     );
+}
+
+return (
+    <div>
+        <h1>Contactor</h1>
+
+        <CreateContact onCreate={handleContactCreate} />
+
+        <CreatePhone onCreate={handlePhoneCreate} />
+
+        <ContactList
+            contacts={contacts}
+            onSelect={handleContactSelect}
+            onDelete={handleContactDelete}
+        />
+
+        {selectedContact && (
+            <div>
+                <PhoneList phones={phones} />
+            </div>
+        )}
+    </div>
+);
 }
 
 export default App;
