@@ -15,12 +15,14 @@ module.exports = (sequelize, Sequelize) => {
         },
         contactId: {
             type: Sequelize.INTEGER,
-            references: {
-                model: 'contacts',
-                key: 'id',
-            }
-        }// DEFINE YOUR MODEL HERE
+        },
     });
-  
+
+    Phone.associate = (models) => {
+        Phone.belongsTo(models.Contact, {
+            foreignKey: 'contactId',
+        });
+    };
+
     return Phone;
 };

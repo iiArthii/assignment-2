@@ -9,8 +9,13 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false,
         },
-        // DEFINE YOUR MODEL HERE
     });
-  
+
+    Contact.associate = (models) => {
+        Contact.hasMany(models.Phone, {
+            foreignKey: 'contactId',
+        });
+    };
+
     return Contact;
 };
