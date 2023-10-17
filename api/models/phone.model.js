@@ -7,11 +7,9 @@ module.exports = (sequelize, Sequelize) => {
         },
         name: {
             type: Sequelize.STRING,
-            allowNull: false,
         },
         number: {
             type: Sequelize.STRING,
-            allowNull: false,
         },
         contactId: {
             type: Sequelize.INTEGER,

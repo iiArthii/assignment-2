@@ -12,7 +12,7 @@ function App() {
     const [phones, setPhones] = useState([]);
 
     useEffect(() => {
-        fetch('/api/contacts')
+        fetch('http://localhost:5001/api/contacts')
             .then(response => response.json())
             .then(data => setContacts(data))
             .catch(error => {
@@ -23,7 +23,7 @@ function App() {
     const handleContactSelect = (contactId) => {
         setSelectedContact(contactId);
 
-        fetch(`/api/contacts/${contactId}/phones`)
+        fetch(`http://localhost:5001/api/contacts${contactId}/phones`)
             .then(response => response.json())
             .then(data => {
                 setPhones(data);
@@ -34,7 +34,7 @@ function App() {
     };
 
     const handleContactCreate = (newContact) => {
-        fetch('/api/contacts', {
+        fetch('http://localhost:5001/api/contacts', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ function App() {
     };
 
     const handleContactDelete = (contactId) => {
-        fetch(`/api/contacts/${contactId}`, {
+        fetch(`http://localhost:5001/api/contacts${contactId}`, {
             method: 'DELETE',
         })
             .then(() => {
