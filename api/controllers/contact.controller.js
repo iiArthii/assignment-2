@@ -3,12 +3,28 @@ const Contacts = db.contacts;
 const Phones = db.phones;
 const Op = db.Sequelize.Op;
 
-// Create contact
 exports.create = (req, res) => {
-    
+    const { name } = req.body;
+
+    if (!name) {
+        return res.status(400).send({ message: 'Name cannot be empty' });
+    }
+
+    const contact = {
+        name,
+    };
+
+    Contacts.create(contact)
+        .then(data => {
+            res.status(201).send(data);
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: err.message || 'An error has occurred while creating the contact',
+            });
+        });
 };
 
-// Get all contacts
 exports.findAll = (req, res) => {
     Contacts.findAll()
         .then(data => {
@@ -22,22 +38,88 @@ exports.findAll = (req, res) => {
         })
         .catch(err => {
             res.status(500).send({
-                message: err.message || "Some error occurred"
+                message: err.message || "An error has occurred"
             });
         });
 };
 
-// Get one contact by id
 exports.findOne = (req, res) => {
-  
+    const { contactId } = req.params;
+
+    Contacts.findByPk(contactId)
+        .then(contact => {
+            if (!contact) {
+                return res.status(404).send({ message: 'Contact not found' });
+            }
+            res.send(contact);
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: err.message || 'An error has occurred while retrieving the contact',
+            });
+        });
 };
 
-// Update one contact by id
 exports.update = (req, res) => {
-    
+    const { contactId } = req.params;
+    const { name } = req.body;
+
+    // Validate request
+    if (!name) {
+        return res.status(400).send({ message: 'Name cannot be empty' });
+    }
+
+    Contacts.findByPk(contactId)
+        .then(contact => {
+            if (!contact) {
+                return res.status(404).send({ message: 'Contact not found' });
+            }
+
+            // Update the contact
+            contact.name = name;
+
+            // Save the updated contact
+            contact.save()
+                .then(data => {
+                    res.send(data);
+                })
+                .catch(err => {
+                    res.status(500).send({
+                        message: err.message || 'An error has occurred while updating the contact',
+                    });
+                });
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: err.message || 'An error has occurred while updating the contact',
+            });
+        });
 };
 
-// Delete one contact by id
 exports.delete = (req, res) => {
-    
+    const { contactId } = req.params;
+
+    Contacts.findByPk(contactId)
+        .then(contact => {
+            if (!contact) {
+                return res.status(404).send({ message: 'Contact not found' });
+            }
+
+            // Delete the contact
+            contact.destroy()
+                .then(() => {
+                    res.send({});
+                })
+                .catch(err => {
+                    res.status(500).send({
+                        message: err.message || 'An error has occurred while deleting the contact',
+                    });
+                });
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: err.message || 'An error has occurred while deleting the contact',
+            });
+        });
 };
+
