@@ -7,7 +7,7 @@ exports.create = (req, res) => {
     const { name, number } = req.body;
 
     if (!name || !number) {
-        return res.status(400).send({ message: 'Name and number cannot be empty' });
+        return res.status(400).json({ message: 'Name and number cannot be empty' });
     }
 
     Phones.create({
@@ -16,10 +16,10 @@ exports.create = (req, res) => {
         contactId,
     })
         .then(phone => {
-            res.send(phone);
+            res.json(phone);
         })
         .catch(err => {
-            res.status(500).send({
+            res.status(500).json({
                 message: err.message || 'Some error occurred while creating the phone number',
             });
         });
@@ -32,10 +32,10 @@ exports.findAll = (req, res) => {
         where: { contactId },
     })
         .then(data => {
-            res.send(data);
+            res.json(data);
         })
         .catch(err => {
-            res.status(500).send({
+            res.status(500).json({
                 message: err.message || 'Some error occurred while retrieving phone numbers',
             });
         });
@@ -49,12 +49,12 @@ exports.findOne = (req, res) => {
     })
         .then(phone => {
             if (!phone) {
-                return res.status(404).send({ message: 'Phone number not found' });
+                return res.status(404).json({ message: 'Phone number not found' });
             }
-            res.send(phone);
+            res.json(phone);
         })
         .catch(err => {
-            res.status(500).send({
+            res.status(500).json({
                 message: err.message || 'Some error occurred while retrieving the phone number',
             });
         });
@@ -65,7 +65,7 @@ exports.update = (req, res) => {
     const { name, number } = req.body;
 
     if (!name || !number) {
-        return res.status(400).send({ message: 'Name and number cannot be empty' });
+        return res.status(400).json({ message: 'Name and number cannot be empty' });
     }
 
     Phones.update(
@@ -73,10 +73,10 @@ exports.update = (req, res) => {
         { where: { id: phoneId, contactId } }
     )
         .then(() => {
-            res.send({ message: 'Phone number updated successfully' });
+            res.json({ message: 'Phone number updated successfully' });
         })
         .catch(err => {
-            res.status(500).send({
+            res.status(500).json({
                 message: err.message || 'Some error occurred while updating the phone number',
             });
         });
@@ -89,10 +89,10 @@ exports.delete = (req, res) => {
         where: { id: phoneId, contactId },
     })
         .then(() => {
-            res.send({});
+            res.json({});
         })
         .catch(err => {
-            res.status(500).send({
+            res.status(500).json({
                 message: err.message || 'Some error occurred while deleting the phone number',
             });
         });
