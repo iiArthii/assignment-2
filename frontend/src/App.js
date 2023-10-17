@@ -9,6 +9,7 @@ import './App.css';
 function App() {
     const [contacts, setContacts] = useState([]);
     const [selectedContact, setSelectedContact] = useState(null);
+    const [phones, setPhones] = useState([]);
 
     useEffect(() => {
         fetch('/api/contacts')
@@ -21,6 +22,15 @@ function App() {
 
     const handleContactSelect = (contactId) => {
         setSelectedContact(contactId);
+
+        fetch(`/api/contacts/${contactId}/phones`)
+            .then(response => response.json())
+            .then(data => {
+                setPhones(data);
+            })
+            .catch(error => {
+                console.error('Error fetching phone numbers:', error);
+            });
     };
 
     const handleContactCreate = (newContact) => {
@@ -66,7 +76,11 @@ function App() {
                 onDelete={handleContactDelete}
             />
 
-            {selectedContact && <PhoneList contactId={selectedContact} />}
+            {selectedContact && (
+                <div>
+                    <PhoneList phones={phones} />
+                </div>
+            )}
         </div>
     );
 }
