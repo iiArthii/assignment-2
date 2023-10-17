@@ -5,6 +5,14 @@ module.exports = (sequelize, Sequelize) => {
             autoIncrement: true,
             primaryKey: true,
         },
+        phoneType: {
+            type: Sequelize.STRING,
+            allowNull: false,
+        },
+        phoneNumber: {
+            type: Sequelize.STRING,
+            allowNull: false,
+        },
         // DEFINE YOUR MODEL HERE
     });
   
