@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import './App.css'; // Import the CSS file
+import './App.css';
 
 function App() {
     const [allContacts, setAllContacts] = useState([]);
