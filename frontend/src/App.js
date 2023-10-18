@@ -6,8 +6,8 @@ function App() {
     const [contacts, setContacts] = useState([]);
     const [selectedContact, setSelectedContact] = useState(null);
     const [phones, setPhones] = useState([]);
-    const [name, setName] = useState('');
-    const [number, setNumber] = useState('');
+    const [newPhoneName, setNewPhoneName] = useState('');
+    const [newPhoneNumber, setNewPhoneNumber] = useState('');
 
     useEffect(() => {
         fetch('http://localhost:5000/api/contacts')
@@ -63,7 +63,7 @@ function App() {
     };
 
     const handlePhoneCreate = (newPhone) => {
-        if (selectedContact && newPhone.name && newPhone.number) {
+        if (selectedContact && newPhoneName && newPhoneNumber) {
             fetch(`http://localhost:5000/api/contacts/${selectedContact}/phones`, {
                 method: 'POST',
                 headers: {
@@ -75,14 +75,15 @@ function App() {
             .then(data => {
                 const createdPhone = data;
                 setPhones([...phones, createdPhone]);
-                setName('');
-                setNumber('');
+                setNewPhoneName('');
+                setNewPhoneNumber('');
             })
             .catch(error => {
                 console.error('Error creating phone:', error);
             });
         }
     };
+
     function ContactList({ contacts, onSelect, onDelete }) {
         return (
             <div>
