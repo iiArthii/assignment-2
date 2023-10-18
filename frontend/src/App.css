@@ -1,24 +1,31 @@
 .container {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
     text-align: center;
     margin: 0 auto;
     max-width: 600px;
+    background-color: #f0f0f0;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .header {
     font-size: 2rem;
     margin: 20px 0;
+    color: #333;
 }
 
 .mainContainer {
     border: 1px solid #ddd;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    background-color: #fff;
 }
 
 .contactHeader {
     font-size: 1.5rem;
+    color: #555;
 }
 
 .contactForm {
@@ -26,7 +33,7 @@
 }
 
 .input {
-    padding: 5px;
+    padding: 10px;
     margin-right: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -37,8 +44,9 @@
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 5px 10px;
+    padding: 10px 20px;
     cursor: pointer;
+    transition: background-color 0.2s;
 }
 
 .buttonCreate:hover {
@@ -67,6 +75,7 @@ hr {
 
 .contactName {
     font-size: 1.2rem;
+    color: #333;
 }
 
 .contactDeleteButton {
@@ -74,8 +83,9 @@ hr {
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 5px 10px;
+    padding: 10px 20px;
     cursor: pointer;
+    transition: background-color 0.2s;
 }
 
 .contactDeleteButton:hover {
@@ -87,7 +97,8 @@ hr {
     padding: 10px;
     border-radius: 4px;
     margin-top: 10px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    background-color: #f9f9f9;
 }
 
 .phoneInput {
@@ -100,9 +111,10 @@ hr {
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 5px 10px;
+    padding: 10px 20px;
     cursor: pointer;
     margin-left: 10px;
+    transition: background-color 0.2s;
 }
 
 .button:hover {
@@ -117,8 +129,9 @@ hr {
 
 .headerCell {
     background-color: #f2f2f2;
-    padding: 8px;
+    padding: 10px;
     text-align: left;
+    font-weight: bold;
 }
 
 .row {
@@ -126,8 +139,9 @@ hr {
 }
 
 .cell {
-    padding: 8px;
+    padding: 10px;
     text-align: left;
+    color: #444;
 }
 
 .buttonDelete {
@@ -135,8 +149,9 @@ hr {
     color: white;
     border: none;
     border-radius: 4px;
-    padding: 5px 10px;
+    padding: 10px 20px;
     cursor: pointer;
+    transition: background-color 0.2s;
 }
 
 .buttonDelete:hover {
