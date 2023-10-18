@@ -1,210 +1,217 @@
-import React, { useState, useEffect } from 'react';
-
-import './App.css';
+import React, { useState, useEffect, useCallback } from 'react';
+import './App.css'; // Import the CSS file
 
 function App() {
-    const [contacts, setContacts] = useState([]);
-    const [selectedContact, setSelectedContact] = useState(null);
-    const [phones, setPhones] = useState([]);
-    const [newPhoneName, setNewPhoneName] = useState('');
-    const [newPhoneNumber, setNewPhoneNumber] = useState('');
+    const [allContacts, setAllContacts] = useState([]);
+    const [newContactName, setNewContactName] = useState('');
 
-    useEffect(() => {
-        fetch('http://localhost:5000/api/contacts')
-            .then(response => response.json())
-            .then(data => setContacts(data))
-            .catch(error => {
-                console.error('Error fetching contacts:', error);
-            });
+    const fetchData = async (url, options = {}) => {
+        const response = await fetch(url, options);
+        return response.json();
+    };
+
+    const retrieveContacts = useCallback(async () => {
+        try {
+            const data = await fetchData('http://localhost:5000/api/contacts');
+            setAllContacts(data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
     }, []);
 
-    const handleContactCreate = (newContact) => {
-        fetch('http://localhost:5000/api/contacts', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newContact),
-        })
-            .then(response => response.json())
-            .then(data => {
-                setContacts([...contacts, data]);
-            })
-            .catch (error => {
-                console.error('Error creating contact:', error);
-            });
-    };
+    useEffect(() => {
+        retrieveContacts();
+    }, [retrieveContacts]);
 
-    const handleContactSelect = (contactId) => {
-        setSelectedContact(contactId);
-
-        fetch(`http://localhost:5000/api/contacts/${contactId}/phones`)
-            .then(response => response.json())
-            .then(data => {
-                setPhones(data);
-            })
-            .catch(error => {
-                console.error('Error fetching phone numbers:', error);
-            });
-    };
-
-    const handleContactDelete = (contactId) => {
-        fetch(`http://localhost:5000/api/contacts/${contactId}`, {
-            method: 'DELETE',
-        })
-            .then(() => {
-                const updatedContacts = contacts.filter(contact => contact.id !== contactId);
-                setContacts(updatedContacts);
-                setSelectedContact(null);
-            })
-            .catch(error => {
-                console.error('Error deleting contact:', error);
-            });
-    };
-
-    const handlePhoneCreate = (newPhone) => {
-        if (selectedContact && newPhoneName && newPhoneNumber) {
-            fetch(`http://localhost:5000/api/contacts/${selectedContact}/phones`, {
+    const createContact = async (name) => {
+        if (name.trim() === '') {
+            alert('Contact name cannot be blank');
+            return;
+        }
+        try {
+            await fetchData('http://localhost:5000/api/contacts', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newPhone),
-            })
-            .then(response => response.json())
-            .then(data => {
-                const createdPhone = data;
-                setPhones([...phones, createdPhone]);
-                setNewPhoneName('');
-                setNewPhoneNumber('');
-            })
-            .catch(error => {
-                console.error('Error creating phone:', error);
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name }),
             });
+            retrieveContacts();
+        } catch (error) {
+            console.error('Error:', error);
         }
     };
 
-    function ContactList({ contacts, onSelect, onDelete }) {
-        return (
-            <div>
-                <h2>Contact List</h2>
-                <ul>
-                    {contacts.map((contact) => (
-                        <li key={contact.id}>
-                            {contact.name}
-                            <button onClick={() => onSelect(contact.id)}>Select</button>
-                            <button onClick={() => onDelete(contact.id)}>Delete</button>
-                        </li>
+    const deleteContact = async (contactId) => {
+        try {
+            await fetchData(`http://localhost:5000/api/contacts/${contactId}`, {
+                method: 'DELETE',
+            });
+            retrieveContacts();
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
+    return (
+        <div className="container">
+            <h1 className="header">Contactor</h1>
+            <div className="mainContainer">
+                <h2 className="contactHeader">Contact</h2>
+                <div className="contactForm">
+                    <input
+                        className="input"
+                        type="text"
+                        placeholder="Name"
+                        value={newContactName}
+                        onChange={(e) => setNewContactName(e.target.value)}
+                    />
+                    <button
+                        className="buttonCreate"
+                        onClick={() => createContact(newContactName)}
+                    >
+                        Create Contact
+                    </button>
+                </div>
+                <hr />
+                <div className="contactList">
+                    {allContacts.map((singleContact) => (
+                        <ContactList
+                            key={singleContact.id}
+                            contact={singleContact}
+                            deleteContact={deleteContact}
+                            fetchData={fetchData}
+                        />
                     ))}
-                </ul>
+                </div>
             </div>
-        );
-    }
-
-    function CreateContact({ onCreate }) {
-        const [name, setName] = useState('');
-
-        const handleCreateContact = () => {
-            if (name) {
-                const newContact = { name };
-                onCreate(newContact);
-                setName('');
-            }
-        };
-
-        return (
-            <div>
-                <h2>Create New Contact</h2>
-                <input
-                    type="text"
-                    placeholder="Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
-                <button onClick={handleCreateContact}>Create</button>
-            </div>
+        </div>
     );
 }
 
-function CreatePhone({ onCreate }) {
-    const [name, setName] = useState('');
-    const [number, setNumber] = useState('');
+function ContactList({ contact, deleteContact, fetchData }) {
+    const [contactPhones, setContactPhones] = useState([]);
+    const [phoneName, setPhoneName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [showDetails, setShowDetails] = useState(false);
 
-    const handlePhoneCreate = () => {
-        if (name && number) {
-            const newPhone = { name, number };
-            onCreate(newPhone);
-            setName('');
-            setNumber('');
+    const retrievePhones = async () => {
+        try {
+            const data = await fetchData(
+                `http://localhost:5000/api/contacts/${contact.id}/phones`
+            );
+            setContactPhones(data);
+        } catch (error) {
+            console.error('Error fetching phones:', error);
+        }
+    };
+
+    useEffect(() => {
+        retrievePhones();
+    }, [contact.id, fetchData]);
+
+    const createPhone = async () => {
+        if (!phoneName.trim() || !phoneNumber.trim()) {
+            alert('Both phone name and number are required!');
+            return;
+        }
+        try {
+            await fetchData(`http://localhost:5000/api/contacts/${contact.id}/phones`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: phoneName,
+                    number: phoneNumber,
+                    contactId: contact.id,
+                }),
+            });
+            setPhoneName('');
+            setPhoneNumber('');
+            retrievePhones();
+        } catch (error) {
+            console.error('Error adding phone:', error);
+        }
+    };
+
+    const deletePhone = async (phoneId) => {
+        try {
+            await fetchData(
+                `http://localhost:5000/api/contacts/${contact.id}/phones/${phoneId}`,
+                {
+                    method: 'DELETE',
+                }
+            );
+            retrievePhones();
+        } catch (error) {
+            console.error('Error deleting phone:', error);
         }
     };
 
     return (
-        <div>
-            <h2>Create New Phone Number</h2>
-
-            <input
-                type="text"
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-            />
-            <input
-                type="text"
-                placeholder="Number"
-                value={number}
-                onChange={(e) => setNumber(e.target.value)}
-            />
-            <button onClick={handlePhoneCreate}>Create</button>
+        <div className="contactList">
+            <div
+                className="contactInfo"
+                onClick={() => setShowDetails(!showDetails)}
+            >
+                <div className="contactName">{contact.name}</div>
+                <button
+                    className="contactDeleteButton"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        deleteContact(contact.id);
+                    }}
+                >
+                    Delete
+                </button>
+            </div>
+            {showDetails && (
+                <>
+                    <div className="phoneDetails">
+                        <div className="phoneInput">
+                            <input
+                                className="input"
+                                placeholder="Name"
+                                value={phoneName}
+                                onChange={(e) => setPhoneName(e.target.value)}
+                            />
+                            <input
+                                className="input"
+                                placeholder="Phone Number"
+                                value={phoneNumber}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
+                            />
+                            <button className="button" onClick={createPhone}>
+                                Create
+                            </button>
+                        </div>
+                        <table className="table">
+                            <thead>
+                                <tr className="row">
+                                    <th className="headerCell">Name</th>
+                                    <th className="headerCell">Number</th>
+                                    <th className="headerCell"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {contactPhones.map((phone) => (
+                                    <tr key={phone.id} className="row">
+                                        <td className="cell">{phone.name}</td>
+                                        <td className="cell">{phone.number}</td>
+                                        <td className="cell">
+                                            <button
+                                                className="buttonDelete"
+                                                onClick={() => deletePhone(phone.id)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </>
+            )}
         </div>
     );
-}
-
-function PhoneList({ phones }) {
-    if (!Array.isArray(phones)) {
-        return (
-            <div>
-                <h2>Phone Numbers</h2>
-                <p>No phone numbers found.</p>
-            </div>
-        );
-    }
-
-    return (
-        <div>
-            <h2>Phone Numbers</h2>
-            <ul>
-                {phones.map((phone) => (
-                    <li key={phone.id}>
-                        {phone.name}: {phone.number}: {phone.contactId}
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
-}
-
-return (
-    <div>
-        <h1>Contactor</h1>
-
-        <CreateContact onCreate={handleContactCreate} />
-
-        <CreatePhone onCreate={handlePhoneCreate} />
-
-        <ContactList
-            contacts={contacts}
-            onSelect={handleContactSelect}
-            onDelete={handleContactDelete}
-        />
-
-        {selectedContact && (
-            <div>
-                <PhoneList phones={phones} />
-            </div>
-        )}
-    </div>
-);
 }
 
 export default App;
