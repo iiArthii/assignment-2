@@ -55,7 +55,7 @@ function App() {
         <div className="container">
             <h1 className="header">Contactor</h1>
             <div className="mainContainer">
-                <h2 className="contactHeader">Contact</h2>
+                <h2 className="contactHeader">Contacts</h2>
                 <div className="contactForm">
                     <input
                         className="input"
@@ -168,7 +168,7 @@ function ContactList({ contact, deleteContact, fetchData }) {
                         <div className="phoneInput">
                             <input
                                 className="input"
-                                placeholder="Phone Name"
+                                placeholder="Name"
                                 value={phoneName}
                                 onChange={(e) => setPhoneName(e.target.value)}
                             />
@@ -179,7 +179,7 @@ function ContactList({ contact, deleteContact, fetchData }) {
                                 onChange={(e) => setPhoneNumber(e.target.value)}
                             />
                             <button className="button" onClick={createPhone}>
-                                Create Phone
+                                Add
                             </button>
                         </div>
                         <table className="table">
@@ -187,7 +187,7 @@ function ContactList({ contact, deleteContact, fetchData }) {
                                 <tr className="row">
                                     <th className="headerCell">Name</th>
                                     <th className="headerCell">Number</th>
-                                    <th className="headerCell">Actions</th>
+                                    <th className="headerCell"></th>
                                 </tr>
                             </thead>
                             <tbody>
