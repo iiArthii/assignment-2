@@ -60,7 +60,7 @@ function App() {
                     <input
                         className="input"
                         type="text"
-                        placeholder="Name"
+                        placeholder="Enter Contact Name"
                         value={newContactName}
                         onChange={(e) => setNewContactName(e.target.value)}
                     />
@@ -93,7 +93,7 @@ function ContactList({ contact, deleteContact, fetchData }) {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [showDetails, setShowDetails] = useState(false);
 
-    const retrievePhones = async () => {
+    const retrievePhones = useCallback(async () => {
         try {
             const data = await fetchData(
                 `http://localhost:5000/api/contacts/${contact.id}/phones`
@@ -102,11 +102,11 @@ function ContactList({ contact, deleteContact, fetchData }) {
         } catch (error) {
             console.error('Error fetching phones:', error);
         }
-    };
+    }, [contact.id, fetchData]);
 
     useEffect(() => {
         retrievePhones();
-    }, [contact.id, fetchData]);
+    }, [retrievePhones]);
 
     const createPhone = async () => {
         if (!phoneName.trim() || !phoneNumber.trim()) {
@@ -168,7 +168,7 @@ function ContactList({ contact, deleteContact, fetchData }) {
                         <div className="phoneInput">
                             <input
                                 className="input"
-                                placeholder="Name"
+                                placeholder="Phone Name"
                                 value={phoneName}
                                 onChange={(e) => setPhoneName(e.target.value)}
                             />
@@ -179,7 +179,7 @@ function ContactList({ contact, deleteContact, fetchData }) {
                                 onChange={(e) => setPhoneNumber(e.target.value)}
                             />
                             <button className="button" onClick={createPhone}>
-                                Create
+                                Create Phone
                             </button>
                         </div>
                         <table className="table">
@@ -187,7 +187,7 @@ function ContactList({ contact, deleteContact, fetchData }) {
                                 <tr className="row">
                                     <th className="headerCell">Name</th>
                                     <th className="headerCell">Number</th>
-                                    <th className="headerCell"></th>
+                                    <th className="headerCell">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
