@@ -96,26 +96,22 @@ exports.update = (req, res) => {
 exports.delete = (req, res) => {
     const { contactId } = req.params;
 
-    Contacts.findByPk(contactId)
-        .then(contact => {
-            if (!contact) {
-                return res.status(404).json({ message: 'Contact not found' });
-            }
+    db.sequelize.transaction(async (t) => {
+        const contact = await Contacts.findByPk(contactId, { transaction: t });
 
-            contact.destroy()
-                .then(() => {
-                    res.json({});
-                })
-                .catch(err => {
-                    res.status(500).json({
-                        message: err.message || 'An error has occurred while deleting the contact',
-                    });
-                });
-        })
-        .catch(err => {
-            res.status(500).json({
-                message: err.message || 'An error has occurred while deleting the contact',
-            });
+        if (!contact) {
+            return res.status(404).json({ message: 'Contact not found' });
+        }
+
+        await Phones.destroy({ where: { contactId: contact.id }, transaction: t });
+
+        await contact.destroy({ transaction: t });
+
+        res.json({});
+    })
+    .catch(err => {
+        res.status(500).json({
+            message: err.message || 'An error has occurred while deleting the contact',
         });
+    });
 };
-
